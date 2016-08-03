@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: esp-rc
+spec:
+  replicas: 2
+  selector:
+    app: esp
+  template:
+    metadata:
+      labels:
+        app: esp 
+    spec:
+      containers:
+        - name: esp
+          image: hpccsystems/platform-ce:latest
+          ports:
+            - containerPort: 8010
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - mountPath: /etc/HPCCSystems
+              name: config
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: config-esp

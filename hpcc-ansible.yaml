@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hpcc-ansible
+  labels:
+    app: hpcc-ansible
+spec:  # specification of the pod’s contents
+  restartPolicy: Never
+  containers:
+    - name: hpcc-ansible
+      image: "hpccsystems/ansible-ce:latest"
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - mountPath: /etc/HPCCSystems
+          name: config-default
+        - mountPath: /etc/HPCCSystems_Roxie
+          name: config-roxie
+        - mountPath: /etc/HPCCSystems_Esp
+          name: config-esp
+  volumes:
+    - name: config-default
+      persistentVolumeClaim:
+        claimName: config-default
+    - name: config-roxie
+      persistentVolumeClaim:
+        claimName: config-roxie
+    - name: config-esp
+      persistentVolumeClaim:
+        claimName: config-esp

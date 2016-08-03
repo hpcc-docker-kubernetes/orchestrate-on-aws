@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: thor-rc<INDEX>
+spec:
+  replicas: 1
+  selector:
+    app: thor<INDEX>
+  template:
+    metadata:
+      labels:
+        app: thor<INDEX>
+    spec:
+      containers:
+        - name: thor<INDEX>
+          image: "hpccsystems/platform-ce:latest"
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - mountPath: /etc/HPCCSystems
+              name: config
+            - mountPath: /var/lib/HPCCSystems
+              name: libdata
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: config-default
+        - name: libdata
+          awsElasticBlockStore:
+            volumeID: <VOLUME_ID>
+            fsType: ext4
