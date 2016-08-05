@@ -21,6 +21,8 @@ spec:
               name: config
             - mountPath: /var/lib/HPCCSystems
               name: libdata
+          command:
+            - /tmp/start_hpcc.sh
       volumes:
         - name: config
           persistentVolumeClaim:

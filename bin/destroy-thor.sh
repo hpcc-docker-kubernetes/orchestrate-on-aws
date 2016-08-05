@@ -23,7 +23,7 @@ do
       [ $? -ne 0 ] && break
       sleep 3
    done
-   rm -rf ${THOR_DIR}/${thor_rc}.yaml
+   #rm -rf ${THOR_DIR}/${thor_rc}.yaml
 
    sleep 20
    echo "aws ec2 delete-volume --volume-id $volume_id" 

@@ -21,6 +21,8 @@ spec:
           volumeMounts:
             - mountPath: /etc/HPCCSystems
               name: config
+          command:
+            - /tmp/start_hpcc.sh
       volumes:
         - name: config
           persistentVolumeClaim:
