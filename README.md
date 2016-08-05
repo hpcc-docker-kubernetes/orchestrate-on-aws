@@ -1,7 +1,69 @@
-# demo-on-aws
+# Demo of Docker/Kubernetes on AWS
 
+## Preparation
+
+To deploy HPCC cluster on Kubernetes/AWS we need AWS Client and Kubernetes package
+
+### Install and Configure AWS Client
+Install AWS Clinet as 
+http://docs.aws.amazon.com/cli/latest/userguide/installing.html#install-bundle-other-os
+
+Configure AWS client with Access Key Secrete Access Key and default region: 
+```sh
+aws configure
+
+AWS Access Key ID [****************]: 
+AWS Secret Access Key [****************4ifT]: 
+Default region name [ap-southeast-1]: 
+Default output format [None]: 
+```
+To test it run:
+```sh
+aws ec2 describe-regions
+```
+
+### Install  Kubernetes 
+Reference http://kubernetes.io/docs/getting-started-guides/aws/
+
+Download the Kubernetes to local directory:
+
+```sh
+export KUBERNETES_PROVIDER=aws; wget -q -O - https://get.k8s.io | bash
+```
+Installed Kubernetes should be in Kubernetes in current directory.
+
+It is helpful to create env file with:
+```sh
+export KUBERNETES_PROVIDER=aws
+export KUBE_AWS_ZONE=ap-southeast-1b #change this to your select zone
+export PATH=<Kubernetes install directory>/platforms/darwin/amd64:$PATH
+# Uncomment following if you want to setup a namespace instead of using default one: "default"
+#export CONTEXT=$(kubectl config view | grep current-context | awk '{print $2}')
+#kubectl config set-context $CONTEXT --namespace=<your namespace name, for example,hpcc-kube> > /dev/null 2>&1
+
+# Change the size based on your need. Following default will set master to m3.medium and node to t2.micro
+export MASTER_SIZE=
+export NODE_SIZE=
+export NUM_NODES=4
+export AWS_S3_REGION=ap-southeast-1 #It is better to match KUBE_AWS_ZONE
+
+# Additional settings can be found in Kubernetes/cluster/aws/config-default.sh
+```
+
+You can source this env file before run any Kubernetes command or add it to profile
+
+### Start Kubernetes on AWS
+Make sure you source the env file created above and go to Kubernetes/cluster and run
+```sh
+./kube-up.sh
+```
+It may ask you to install addional packages.
+
+When it finish you should see the master and nodes (minion) in AWS Console
 
 ## Quick Start
+
+
 ### Create a  Cluster
 Go to demo-on-aws/bin directory and run
 ```sh
@@ -18,12 +80,16 @@ Login to hpcc-ansible node:
 kubectl exec -i -t hpcc-ansible -- bash -il
 
 export TERM=xterm
+stty rows 50 cols 120
 ```
 Go to /opt/hpcc-tools and run
 ```sh
 ./config_hpcc.sh
 ```
-This should collect ips and generate environment.xml and start HPCC cluster
+This should collect ips and generate environment.xml and start HPCC cluster with Ansible playbook
+
+Even "host_key_checking=false" is set in /etc/ansible/ansible.cfg but it seems not work.
+use "export ANSIBLE_HOST_KEY_CHECKING=False" instead.
 
 
 ### Access ECLWatch
@@ -50,149 +116,3 @@ You should use either ip with port 8010 to access ECLWatch
 ```sh
 ./destroy-all.sh
 ```
-
-
-Followings are manual steps (need update)
-Change to your region if it not ap-southeast-1b
-
-## NFS Volumes
-There are two types of NFS Volumes: 1) share HPCC configuration such as  environment.xml 2) share roxie data for the roxie cluster
-
-### Create EBS for HPCC Configuration
-```sh
-aws ec2 create-volume --availability-zone ap-southeast-1b --size 1 --volume-type gp2
-```
-
-### Create EBS for Roxie data
-```sh
-aws ec2 create-volume --availability-zone ap-southeast-1b --size 10 --volume-type gp2
-```
-
-## NFS Server
-### Create a ReplicateController defined in  nfs-server-rc.yaml with NFS volume created above
-```sh
-kubectl create -f nfs-server-rc.yaml
-```
-The nfs container image by default run command "/usr/local/bin/run_nfs.sh /exports". Since we export several
-directories we overwrite with container command and parameters "/usr/local/bin/run_nfs.sh /hpcc-config hpcc-data"
-If manually change: 
-```sh
-  1) kubectl exec to the nfs-server 
-  2) add /hpcc-config hpcc-data to /etc/exports and delete /exports 
-  3) run "exportfs -r -s -a"
-```
-
-### Create a service for NFS server defined in  nfs-server-service.yaml
-```sh
-kubectl create -f nfs-server-service.yaml
-```
-Get nfs-server services ip (cluster ip)
-If this ip doesn't work maybe try pod ip though it is not recommended.
-```sh
-kubectl describe services nfs-server
-```
-
-## Create Persistent Volumes (PV) and Persistent Volumes Claim
-For each nfs exported storage there should be a pair of PV and PVC. The pods will use PVC to mount the NFS storage. 
-
-### Create PV and PVC for HPCC configuration
-Create Persistent Volume for nfs mount point /hpcc-config
-```sh
-kubectl create -f config-pv.yaml
-```
-To see the PV
-```sh
-kubectl describe pv config
-```
-Create Persistent Volume Claim  for nfs
-```sh
-kubectl create -f config-pvc.yaml
-```
-To see the PVC
-```sh
-kubectl describe pvc config
-```
-Create PV and PVC pair for nfs mount point /hpcc-config/roxie
-```sh
-kubectl create -f config-roxie-pv.yaml
-kubectl create -f config-roxie-pvc.yaml
-```
-Create PV and PVC pair for nfs mount point /hpcc-config/esp
-```sh
-kubectl create -f config-esp-pv.yaml
-kubectl create -f config-esp-pvc.yaml
-```
-
-
-### Create PV and PVC for Roxie Shared Data
-Create Persistent Volume 
-```sh
-kubectl create -f data-pv.yaml
-```
-Create Persistent Volume Claim
-```sh
-kubectl create -f data-pvc.yaml
-```
-
-##  Roxie 
-Every Roxie node will have one NFS shared /etc/HPCCSystems volume and one NFS shared /var/lib/HPCCSystems/hpcc-data volume
-### Create Roxie ReplicateController
-```sh
-kubectl create -f roxie-rc.yaml
-```
-To check the status:
-```sh
-kubectl get rc roxie or kubectl get pod and kubectl get pod <pod name> -o json
-```
-### Create Roxie Service
-```sh
-kubectl create -f roxie-service.yaml
-```
-To check the status:
-```sh
-kubectl get service roxie or kubectl describe service roxie
-```
-## Esp 
-Every Esp node will have one NFS shared /etc/HPCCSystems volume 
-### Create Esp ReplicateController
-```sh
-kubectl create -f esp-rc.yaml
-```
-To check the status:
-```sh
-kubectl get rc esp or kubectl get pod and kubectl get pod <pod name> -o json
-```
-### Create Esp Service
-```sh
-kubectl create -f esp-service.yaml
-```
-To check the status:
-```sh
-kubectl get service esp or kubectl describe service esp
-```
-
-## Thor
-Every Roxie node will have one NFS shared /etc/HPCCSystems volume and one EBS volume mounted to /var/lib/HPCCSystems/hpcc-data
-
-### Create EBS for HPCC Configuration
-```sh
-aws ec2 create-volume --availability-zone ap-southeast-1b --size 10 --volume-type gp2
-```
-set volumeID in thor-rc1.yaml
-```sh
-kubectl create -f thor-rc1.yaml
-```
-Do same for second set:
-```sh
-aws ec2 create-volume --availability-zone ap-southeast-1b --size 10 --volume-type gp2
-```
-set volumeID in thor-rc2.yaml
-```sh
-kubectl create -f thor-rc2.yaml
-```
-To check the status:
-```sh
-kubectl get pod
-```
-
-## Ansible

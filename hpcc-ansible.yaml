@@ -18,6 +18,8 @@ spec:  # specification of the pod’s contents
           name: config-roxie
         - mountPath: /etc/HPCCSystems_Esp
           name: config-esp
+      stdin: true
+      tty: true
   volumes:
     - name: config-default
       persistentVolumeClaim:
