@@ -20,6 +20,9 @@ spec:  # specification of the pod’s contents
           name: config-esp
       stdin: true
       tty: true
+      env:
+        - name: NUM_ROXIE_LB
+          value: "<NUM_ROXIE_LB>"
   volumes:
     - name: config-default
       persistentVolumeClaim:

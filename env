@@ -1,0 +1,19 @@
+export KUBERNETES_PROVIDER=aws
+export KUBE_AWS_ZONE=ap-southeast-1b #change this to your select zone
+export AWS_S3_REGION=ap-southeast-1 #It is better to match KUBE_AWS_ZONE
+#export PATH=<Kubernetes install directory>/platforms/darwin/amd64:$PATH
+export PATH=~/work/Google/Kubernetes/platforms/darwin/amd64:$PATH
+# Uncomment following if you want to setup a namespace instead of using default one: "default"
+#export CONTEXT=$(kubectl config view | grep current-context | awk '{print $2}')
+#kubectl config set-context $CONTEXT --namespace=<your namespace name, for example,hpcc-kube> > /dev/null 2>&1
+
+# Change the size based on your need. Following default will set master to m3.medium and node to t2.micro
+export MASTER_SIZE=
+export NODE_SIZE=
+export NUM_NODES=4
+
+# Each shared volume group will be assigned a load balancer.
+# If zero each roxie instance will have a dedicated volume and no load balancer will be created
+export NUM_ROXIE_SHARED_VOLUME=0
+export ROXIE_VOLUME_SIZE=10
+export THOR_VOLUME_SIZE=10

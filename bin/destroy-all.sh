@@ -3,6 +3,8 @@
 SCRIPT_DIR=$(dirname $0)
 ROOT_DIR=${SCRIPT_DIR}/..
 CONFIG_DIR=${ROOT_DIR}/conf
+PV_DIR=${ROOT_DIR}/pv
+ROXIE_DIR=${ROOT_DIR}/roxie
 
 
 function delete_one()
@@ -22,20 +24,29 @@ function delete_one()
 #------------------------------------------------
 # Destroy Esp pods and load balancer service
 #
+
 delete_one service esp ${ROOT_DIR}/esp-service.yaml
 delete_one pod esp-rc ${ROOT_DIR}/esp-rc.yaml
-
 
 #------------------------------------------------
 # Destroy Roxie pods and load balancer service
 #
-delete_one service roxie ${ROOT_DIR}/roxie-service.yaml
-delete_one pod roxie-rc ${ROOT_DIR}/roxie-rc.yaml
+if [ ${NUM_ROXIE_SHARED_VOLUME} -gt 0 ]
+then
+  for i in $(seq 1 ${NUM_ROXIE_SHARED_VOLUME})
+  do
+    delete_one service roxie${i} ${ROXIE_DIR}/roxie-service${i}.yaml
+    delete_one pod roxie-rc${i} ${ROXIE_DIR}/roxie-rc${i}.yaml
+  done
+else
+  ${SCRIPT_DIR}/destroy-rc-w-esb.sh roxie
+
+fi
 
 #------------------------------------------------
 # Destroy Thor pods and volumes
 #
-${SCRIPT_DIR}/destroy-thor.sh
+${SCRIPT_DIR}/destroy-rc-w-esb.sh thor
 
 #------------------------------------------------
 # Destroy Dali pod
@@ -45,7 +56,7 @@ delete_one pod dali-rc ${ROOT_DIR}/dali-rc.yaml
 #------------------------------------------------
 # Destroy HPCC Ansible pod
 #
-delete_one pod hpcc-ansible ${ROOT_DIR}/hpcc-ansible.yaml
+delete_one pod hpcc-ansible ${CONFIG_DIR}/hpcc-ansible.yaml
 
 #------------------------------------------------
 # Destroy Persistent Volume Claims (PVC)
@@ -53,7 +64,7 @@ delete_one pod hpcc-ansible ${ROOT_DIR}/hpcc-ansible.yaml
 kubectl get pvc | cut -d' ' -f1 | grep -v "^NAME$" | \
 while read pvc_name
 do
-   delete_one pvc ${pvc_name} ${ROOT_DIR}/${pvc_name}-pvc.yaml
+   delete_one pvc ${pvc_name} ${PV_DIR}/${pvc_name}-pvc.yaml
 done
 
 #------------------------------------------------
@@ -62,7 +73,7 @@ done
 kubectl get pv | cut -d' ' -f1 | grep -v "^NAME$" | \
 while read pv_name
 do
-   delete_one pv ${pv_name} ${CONFIG_DIR}/${pv_name}-pv.yaml
+   delete_one pv ${pv_name} ${PV_DIR}/${pv_name}-pv.yaml
 done
 
 #------------------------------------------------
@@ -100,3 +111,4 @@ kubectl get pods
 kubectl get services
 kubectl get pv
 kubectl get pvc
+#aws ec2 describe-volumes | grep -i available
