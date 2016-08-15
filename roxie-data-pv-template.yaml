@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: data
+  name: roxie-data-<INDEX>
 spec:
   capacity:
-    storage: 10Gi
+    storage: <ROXIE_VOLUME_SIZE>Gi
   accessModes:
     - ReadWriteMany
   nfs:
     # FIXME: use the right IP
     server: <NFS_SERVICE_IP>
-    path: /hpcc-data
+    path: /roxie-data-<INDEX>

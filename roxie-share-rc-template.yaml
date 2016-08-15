@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: roxie-rc<INDEX>
+spec:
+  replicas: 2
+  selector:
+    app: roxie<INDEX>
+  template:
+    metadata:
+      labels:
+        app: roxie<INDEX>
+    spec:
+      containers:
+        - name: roxie<INDEX>
+          image: hpccsystems/platform-ce:latest
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - mountPath: /etc/HPCCSystems
+              name: config
+            - mountPath: /var/lib/HPCCSystems/hpcc-data
+              name: data
+          command:
+            - /tmp/start_hpcc.sh
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: config-roxie
+        - name: data
+          persistentVolumeClaim:
+            claimName: roxie-data-<INDEX>

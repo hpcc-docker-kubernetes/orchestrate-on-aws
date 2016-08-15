@@ -1,15 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata: 
-  name: roxie
+  name: roxie<INDEX>
   labels: 
-     app: roxie
+     app: roxie<INDEX>
 spec: 
   ports: 
-    - name: roxie
+    - name: roxie<INDEX>
       protocol: TCP
       port: 9876
       targetPort: 9876 
   selector: 
-     app: roxie
+     app: roxie<INDEX>
   type: LoadBalancer
