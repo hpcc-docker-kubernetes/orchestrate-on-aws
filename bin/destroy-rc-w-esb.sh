@@ -4,6 +4,8 @@
 SCRIPT_DIR=$(dirname $0)
 ROOT_DIR=${SCRIPT_DIR}/..
 
+source ${ROOT_DIR}/env
+
 if [ -z "$1" ]
 then
    echo "Usage  $(basename $0)  <type>"

@@ -10,20 +10,20 @@ function get_aws_region_and_zone()
 {
    AWS_REGION=$(aws configure list | grep region | \
          sed -n 's/^  *//gp' | sed -n 's/  */ /gp' | cut -d' ' -f2)
-   AWS_ZONE=${AWS_REGION}b
-   aws ec2 describe-availability-zones --region $AWS_REGION | grep -q $AWS_ZONE
+   KUBE_AWS_ZONE=${AWS_REGION}b
+   aws ec2 describe-availability-zones --region $AWS_REGION | grep -q $KUBE_AWS_ZONE
    if [ $? -ne 0 ]; then
-      echo "We assume availability-zone is {AWS_ZONE} but it doesn't exist"
+      echo "We assume availability-zone is {KUBE_AWS_ZONE} but it doesn't exist"
       echo "Check with \" aws ec2 describe-availability-zones --region $AWS_REGION\"" 
       exit 1
    fi
-   echo "AWS Region: ${AWS_REGION}, ZONE: $AWS_ZONE "
+   echo "AWS Region: ${AWS_REGION}, ZONE: $KUBE_AWS_ZONE "
    echo ""
 }
 
 function create_volumes()
 {
-  VOLUME_CONF=$(aws ec2 create-volume --availability-zone ${AWS_ZONE} \
+  VOLUME_CONF=$(aws ec2 create-volume --availability-zone ${KUBE_AWS_ZONE} \
      --size 1 --volume-type gp2 | grep "VolumeId" | \
      cut -d':' -f2 | sed 's/.*\"\(.*\)\".*/\1/')
 
@@ -31,7 +31,7 @@ function create_volumes()
   [ ${NUM_ROXIE_SHARED_VOLUME} -lt 1 ] && return
   for i in $(seq 1 ${NUM_ROXIE_SHARED_VOLUME})
   do
-     VOLUME_ROXIE[$i]=$(aws ec2 create-volume --availability-zone ${AWS_ZONE} \
+     VOLUME_ROXIE[$i]=$(aws ec2 create-volume --availability-zone ${KUBE_AWS_ZONE} \
         --size 10 --volume-type gp2 | grep "VolumeId" | \
         cut -d':' -f2 | sed 's/.*\"\(.*\)\".*/\1/')
   done
@@ -105,7 +105,9 @@ function create_pvc()
 [ ! -d $PV_DIR ] && mkdir -p $PV_DIR 
 [ ! -d $ROXIE_DIR ] && mkdir -p $ROXIE_DIR 
 
-get_aws_region_and_zone
+#get_aws_region_and_zone
+source ${SCRIPT_DIR}/../env
+
 
 #------------------------------------------------
 # Create NFS server and its service 
