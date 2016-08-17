@@ -6,6 +6,7 @@ CONFIG_DIR=${ROOT_DIR}/conf
 PV_DIR=${ROOT_DIR}/pv
 ROXIE_DIR=${ROOT_DIR}/roxie
 
+source ${ROOT_DIR}/env
 
 function delete_one()
 {

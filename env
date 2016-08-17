@@ -1,6 +1,8 @@
 export KUBERNETES_PROVIDER=aws
-export KUBE_AWS_ZONE=ap-southeast-1b #change this to your select zone
-export AWS_S3_REGION=ap-southeast-1 #It is better to match KUBE_AWS_ZONE
+AWS_REGION=$(aws configure list | grep region | \
+         sed -n 's/^  *//gp' | sed -n 's/  */ /gp' | cut -d' ' -f2)
+export KUBE_AWS_ZONE=${AWS_REGION}b
+export AWS_S3_REGION=${KUBE_AWS_ZONE}
 #export PATH=<Kubernetes install directory>/platforms/darwin/amd64:$PATH
 export PATH=~/work/Google/Kubernetes/platforms/darwin/amd64:$PATH
 # Uncomment following if you want to setup a namespace instead of using default one: "default"

@@ -15,7 +15,7 @@ function get_aws_zone()
 {
    AWS_REGION=$(aws configure list | grep region | \
          sed -n 's/^  *//gp' | sed -n 's/  */ /gp' | cut -d' ' -f2)
-   AWS_ZONE=${AWS_REGION}b
+   KUBE_AWS_ZONE=${AWS_REGION}b
 }
 
 
@@ -54,7 +54,8 @@ cur_index=$(echo "$max_index" | sed -n 's/^00*//gp')
 #-------------------------------------
 # Loop number thor/roxie to create 
 #
-get_aws_zone
+#get_aws_zone
+source ${ROOT_DIR}/env
 mkdir -p $CONF_DIR
 i=0
 while [ $i -lt $num ]
@@ -65,7 +66,7 @@ do
    #echo $padded_index
 
    # Create ESB volume
-   VOLUME_ID=$(aws ec2 create-volume --availability-zone ${AWS_ZONE} \
+   VOLUME_ID=$(aws ec2 create-volume --availability-zone ${KUBE_AWS_ZONE} \
      --size $VOLUME_SIZE --volume-type gp2 | grep "VolumeId" | \
      cut -d':' -f2 | sed 's/.*\"\(.*\)\".*/\1/')
    echo "Volume id: $VOLUME_ID"
