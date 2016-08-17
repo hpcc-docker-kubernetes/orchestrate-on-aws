@@ -14,6 +14,6 @@ export NUM_NODES=4
 
 # Each shared volume group will be assigned a load balancer.
 # If zero each roxie instance will have a dedicated volume and no load balancer will be created
-export NUM_ROXIE_SHARED_VOLUME=0
+export NUM_ROXIE_SHARED_VOLUME=2
 export ROXIE_VOLUME_SIZE=10
 export THOR_VOLUME_SIZE=10
