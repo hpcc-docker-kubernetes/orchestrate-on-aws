@@ -10,6 +10,10 @@ spec:
       protocol: TCP
       port: 9876
       targetPort: 9876 
+    - name: dfs
+      protocol: TCP
+      port: 7100
+      targetPort: 7100
   selector: 
      app: roxie<INDEX>
   type: LoadBalancer

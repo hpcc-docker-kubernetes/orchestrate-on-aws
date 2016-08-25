@@ -2,6 +2,8 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: config-roxie
+  labels:
+    config-type: roxie
 spec:
   capacity:
     storage: 1Gi

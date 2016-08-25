@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: nfs-server
-        image: gcr.io/google-samples/nfs-server:1.1
+        image: hpccsystems/nfs-server:latest
         command:
           - /usr/local/bin/run_nfs.sh
         args:
