@@ -142,6 +142,7 @@ else
   ${SCRIPT_DIR}/create-rc-w-esb.sh roxie 2 
 fi
 
+
 #------------------------------------------------
 # Create Esp pods and load balancer service
 #
