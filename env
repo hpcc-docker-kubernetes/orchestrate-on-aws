@@ -4,18 +4,19 @@ AWS_REGION=$(aws configure list | grep region | \
 export KUBE_AWS_ZONE=${AWS_REGION}b
 export AWS_S3_REGION=${KUBE_AWS_ZONE}
 #export PATH=<Kubernetes install directory>/platforms/darwin/amd64:$PATH
-export PATH=~/work/Google/Kubernetes/platforms/darwin/amd64:$PATH
+export PATH=~/work/Google/Kubernetes/v1.3.6/platforms/darwin/amd64:$PATH
 # Uncomment following if you want to setup a namespace instead of using default one: "default"
 #export CONTEXT=$(kubectl config view | grep current-context | awk '{print $2}')
 #kubectl config set-context $CONTEXT --namespace=<your namespace name, for example,hpcc-kube> > /dev/null 2>&1
 
-# Change the size based on your need. Following default will set master to m3.medium and node to t2.micro
 export MASTER_SIZE=
-export NODE_SIZE=
-export NUM_NODES=4
+# For HPCC regression test probably need set following to m4.xlarge (4cpu 16GB mem) or even m4.2xlarge (8cpu 32GB mem)
+# check limits in ec2 some setting for example m4.xlarge may not be available
+export NODE_SIZE=m4.xlarge
+export NUM_NODES=5
 
 # Each shared volume group will be assigned a load balancer.
 # If zero each roxie instance will have a dedicated volume and no load balancer will be created
 export NUM_ROXIE_SHARED_VOLUME=2
-export ROXIE_VOLUME_SIZE=10
-export THOR_VOLUME_SIZE=10
+export ROXIE_VOLUME_SIZE=60
+export THOR_VOLUME_SIZE=60
