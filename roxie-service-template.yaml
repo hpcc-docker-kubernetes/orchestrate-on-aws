@@ -14,6 +14,26 @@ spec:
       protocol: TCP
       port: 7100
       targetPort: 7100
+    - name: ccdmul 
+      protocol: UDP
+      port: 8887
+      targetPort: 8887
+    - name: ccdsrv 
+      protocol: UDP
+      port: 9000
+      targetPort: 9000
+    - name: ccddata 
+      protocol: UDP
+      port: 9001
+      targetPort: 9001
+    - name: ccdcli 
+      protocol: UDP
+      port: 9002
+      targetPort: 9002
+    - name: ccdsnif
+      protocol: UDP
+      port: 9003
+      targetPort: 9003
   selector: 
      app: roxie<INDEX>
   type: LoadBalancer

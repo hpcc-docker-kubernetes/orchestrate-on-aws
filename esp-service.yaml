@@ -10,6 +10,10 @@ spec:
       protocol: TCP
       port: 8010
       targetPort: 8010
+    - name: wsecl
+      protocol: TCP
+      port: 8002
+      targetPort: 8002
   selector: 
     app: esp
   type: LoadBalancer
