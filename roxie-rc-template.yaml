@@ -26,7 +26,7 @@ spec:
       volumes:
         - name: config
           persistentVolumeClaim:
-            claimName: config-roxie
+            claimName: config-default
         - name: libdata
           awsElasticBlockStore:
             volumeID: <VOLUME_ID>

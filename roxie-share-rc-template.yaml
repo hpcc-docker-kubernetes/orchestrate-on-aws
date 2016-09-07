@@ -3,7 +3,7 @@ kind: ReplicationController
 metadata:
   name: roxie-rc<INDEX>
 spec:
-  replicas: 2
+  replicas: <NUM_ROXIE_PER_SET>
   selector:
     app: roxie<INDEX>
   template:
@@ -26,7 +26,7 @@ spec:
       volumes:
         - name: config
           persistentVolumeClaim:
-            claimName: config-roxie
+            claimName: config-roxie-<INDEX>
         - name: data
           persistentVolumeClaim:
             claimName: roxie-data-<INDEX>
