@@ -23,5 +23,3 @@ export ROXIE_VOLUME_SIZE=60
 export THOR_VOLUME_SIZE=60
 export NUM_THOR=2
 export NUM_ROXIE=2 # NUM_ROXIE_SHARED_VOLUME=0. Each roxie has its own volume attached
-
-
