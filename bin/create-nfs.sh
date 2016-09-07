@@ -33,13 +33,13 @@ function create_volumes()
      cut -d':' -f2 | sed 's/.*\"\(.*\)\".*/\1/')
 
 
- [ ${NUM_ROXIE_SHARED_VOLUME} -lt 1 ] && return
- for i in $(seq 1 ${NUM_ROXIE_SHARED_VOLUME})
- do
+  [ ${NUM_ROXIE_SHARED_VOLUME} -lt 1 ] && return
+  for i in $(seq 1 ${NUM_ROXIE_SHARED_VOLUME})
+  do
     VOLUME_ROXIE[$i]=$(aws ec2 create-volume --availability-zone ${KUBE_AWS_ZONE} \
         --size ${ROXIE_VOLUME_SIZE} --volume-type gp2 | grep "VolumeId" | \
         cut -d':' -f2 | sed 's/.*\"\(.*\)\".*/\1/')
- done
+  done
 }
 
 function create_one()
@@ -180,12 +180,16 @@ done
 
 sleep 3
 nfs_pod=$(kubectl get pod | grep nfs-server | cut -d' ' -f1)
-echo "kubectl exec $nfs_pod -- mkdir -p /hpcc-config/default"
-kubectl exec ${nfs_pod} -- mkdir -p /hpcc-config/default
-sleep 2
-echo "kubectl exec $nfs_pod -- mkdir -p /hpcc-config/roxie"
-kubectl exec ${nfs_pod} -- mkdir -p /hpcc-config/roxie 
-sleep 2
+#echo "kubectl exec $nfs_pod -- mkdir -p /hpcc-config/default"
+#kubectl exec ${nfs_pod} -- mkdir -p /hpcc-config/default
+if [ ${NUM_ROXIE_SHARED_VOLUME} -gt 0 ]
+then
+  for i in $(seq 1 ${NUM_ROXIE_SHARED_VOLUME})
+  do
+    echo "kubectl exec $nfs_pod -- mkdir -p /hpcc-config/roxie/$i"
+    kubectl exec ${nfs_pod} -- mkdir -p /hpcc-config/roxie/$i 
+  done
+fi
 echo "kubectl exec $nfs_pod -- mkdir -p /hpcc-config/esp"
 kubectl exec ${nfs_pod} -- mkdir -p /hpcc-config/esp
 echo ""

@@ -60,14 +60,15 @@ function create_pv()
       ${ROOT_DIR}/config-esp-pv-template.yaml > ${PV_DIR}/config-esp-pv.yaml
    create_one ${PV_DIR}/config-esp-pv.yaml
 
-   sed  "s/<NFS_SERVICE_IP>/${nfs_service_ip}/g" \
-      ${ROOT_DIR}/config-roxie-pv-template.yaml > ${PV_DIR}/config-roxie-pv.yaml
-   create_one ${PV_DIR}/config-roxie-pv.yaml
-
    if [ ${NUM_ROXIE_SHARED_VOLUME} -gt 0 ]
    then
      for i in $(seq 1 ${NUM_ROXIE_SHARED_VOLUME})
      do
+       sed  "s/<NFS_SERVICE_IP>/${nfs_service_ip}/g; \
+             s/<INDEX>/${i}/g"  \
+            ${ROOT_DIR}/config-roxie-pv-template.yaml > ${PV_DIR}/config-roxie-${i}-pv.yaml
+        create_one ${PV_DIR}/config-roxie-${i}-pv.yaml
+
         sed  "s/<NFS_SERVICE_IP>/${nfs_service_ip}/g; \
               s/<INDEX>/${i}/g;  \
               s/<ROXIE_VOLUME_SIZE>/${ROXIE_VOLUME_SIZE}/g; " \
@@ -86,13 +87,14 @@ function create_pvc()
    cp ${ROOT_DIR}/config-esp-pvc.yaml ${PV_DIR}/
    create_one ${PV_DIR}/config-esp-pvc.yaml
 
-   cp ${ROOT_DIR}/config-roxie-pvc.yaml ${PV_DIR}/
-   create_one ${PV_DIR}/config-roxie-pvc.yaml
-
    if [ ${NUM_ROXIE_SHARED_VOLUME} -gt 0 ]
    then
      for i in $(seq 1 ${NUM_ROXIE_SHARED_VOLUME})
      do
+        sed "s/<INDEX>/${i}/g"  \
+            ${ROOT_DIR}/config-roxie-pvc-template.yaml > ${PV_DIR}/config-roxie-${i}-pvc.yaml
+        create_one ${PV_DIR}/config-roxie-${i}-pvc.yaml
+
         sed  "s/<INDEX>/${i}/g; s/<ROXIE_VOLUME_SIZE>/${ROXIE_VOLUME_SIZE}/g; " \
            ${ROOT_DIR}/roxie-data-pvc-template.yaml > ${PV_DIR}/roxie-data-${i}-pvc.yaml
         create_one ${PV_DIR}/roxie-data-${i}-pvc.yaml
@@ -131,7 +133,8 @@ if [ ${NUM_ROXIE_SHARED_VOLUME} -gt 0 ]
 then
   for i in $(seq 1 ${NUM_ROXIE_SHARED_VOLUME})
   do
-    sed  "s/<INDEX>/${i}/g;" \
+    sed  "s/<INDEX>/${i}/g; \
+          s/<NUM_ROXIE_PER_SET>/${NUM_ROXIE_PER_SET}/g;" \
            ${ROOT_DIR}/roxie-share-rc-template.yaml > ${ROXIE_DIR}/roxie-rc${i}.yaml
     sed  "s/<INDEX>/${i}/g;" \
            ${ROOT_DIR}/roxie-service-template.yaml > ${ROXIE_DIR}/roxie-service${i}.yaml
@@ -139,7 +142,7 @@ then
     create_one ${ROXIE_DIR}/roxie-service${i}.yaml
   done
 else
-  ${SCRIPT_DIR}/create-rc-w-esb.sh roxie 2 
+  ${SCRIPT_DIR}/create-rc-w-esb.sh roxie $NUM_ROIXIE 
 fi
 
 
@@ -151,7 +154,7 @@ create_one ${ROOT_DIR}/esp-service.yaml
 
 #------------------------------------------------
 # Create Thor Volumes and pods 
-${SCRIPT_DIR}/create-rc-w-esb.sh   thor 2 
+${SCRIPT_DIR}/create-rc-w-esb.sh  thor $NUM_THOR 
 
 #------------------------------------------------
 # Create Dali (HPCC support) pod 

@@ -14,10 +14,6 @@ spec:  # specification of the pod’s contents
       volumeMounts:
         - mountPath: /etc/HPCCSystems
           name: config-default
-        - mountPath: /etc/HPCCSystems_Roxie
-          name: config-roxie
-        - mountPath: /etc/HPCCSystems_Esp
-          name: config-esp
       stdin: true
       tty: true
       env:
@@ -27,9 +23,3 @@ spec:  # specification of the pod’s contents
     - name: config-default
       persistentVolumeClaim:
         claimName: config-default
-    - name: config-roxie
-      persistentVolumeClaim:
-        claimName: config-roxie
-    - name: config-esp
-      persistentVolumeClaim:
-        claimName: config-esp

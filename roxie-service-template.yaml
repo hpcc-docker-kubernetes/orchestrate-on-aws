@@ -36,4 +36,3 @@ spec:
       targetPort: 9003
   selector: 
      app: roxie<INDEX>
-  type: LoadBalancer
