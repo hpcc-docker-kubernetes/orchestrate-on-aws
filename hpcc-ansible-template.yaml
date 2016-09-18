@@ -9,6 +9,8 @@ spec:  # specification of the pod’s contents
   containers:
     - name: hpcc-ansible
       image: "hpccsystems/ansible-ce:latest"
+      command:
+        - /opt/hpcc-tools/mon_ips.sh
       securityContext:
         privileged: true
       volumeMounts:

@@ -6,7 +6,7 @@ metadata:
      app: roxie<INDEX>
 spec: 
   ports: 
-    - name: roxie<INDEX>
+    - name: roxie
       protocol: TCP
       port: 9876
       targetPort: 9876 

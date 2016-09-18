@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: roxie-rc1
+  #namespace: default
+spec:
+  scaleRef:
+    kind: ReplicationController
+    name: roxie-rc1
+    subresource: scale
+  minReplicas: 2 
+  maxReplicas: 3
+  cpuUtilization:
+    targetPercentage: 50
