@@ -139,7 +139,7 @@ then
    echo "============================================"
 fi
 ${SCRIPT_DIR}/create-nfs.sh
-if [ $interactive -eq 1]
+if [ $interactive -eq 1 ]
 then
    echo ""
    echo "kubectl get pod | grep nfs-server"
