@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: esp-rc
+  #namespace: default
+spec:
+  scaleRef:
+    kind: ReplicationController
+    name: esp-rc
+    subresource: scale
+  minReplicas: 1
+  maxReplicas: 3
+  cpuUtilization:
+    targetPercentage: 5

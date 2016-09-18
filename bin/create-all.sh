@@ -6,6 +6,15 @@ CONF_DIR=${ROOT_DIR}/conf
 PV_DIR=${ROOT_DIR}/pv
 ROXIE_DIR=${ROOT_DIR}/roxie
 
+usage()
+{
+   echo "Usage: $(basename $0) <options>"
+   echo "  -i  interactive mode"
+   echo ""
+   exit 1
+}
+
+
 function get_aws_region_and_zone()
 {
    AWS_REGION=$(aws configure list | grep region | \
@@ -102,6 +111,15 @@ function create_pvc()
    fi
 }
 
+function press_key_to_continue()
+{
+  echo "Press any key to continue."
+  read input
+}
+
+interactive=0
+[ -n "$1" ] && [ "$1" = "-i" ] && interactive=1
+
 
 [ ! -d $CONF_DIR ] && mkdir -p $CONF_DIR 
 [ ! -d $PV_DIR ] && mkdir -p $PV_DIR 
@@ -114,21 +132,77 @@ source ${SCRIPT_DIR}/../env
 #------------------------------------------------
 # Create NFS server and its service 
 #
+if [ $interactive -eq 1 ]
+then
+   echo ""
+   echo "Create shared volumes and NFS server/service"
+   echo "============================================"
+fi
 ${SCRIPT_DIR}/create-nfs.sh
+if [ $interactive -eq 1]
+then
+   echo ""
+   echo "kubectl get pod | grep nfs-server"
+   kubectl get pod | grep nfs-server
+   echo ""
+   echo "kubectl get service | grep nfs"
+   kubectl get service | grep nfs
+
+   cat << EOF
+
+Export directories:
+   /hpcc-config 
+   /roxie-data-1
+     
+EOF
+  press_key_to_continue
+fi
 
 #------------------------------------------------
-# Create Persisent Volumes (PV) 
+# Create Persistent Volumes (PV) 
 #
+if [ $interactive -eq 1 ]
+then
+   echo ""
+   echo "Create Persistent Volumes (PV)"
+   echo "=============================="
+fi
 create_pv
+if [ $interactive -eq 1 ]
+then
+  echo ""
+  echo "kubectl get pv"
+  kubectl get pv
+  press_key_to_continue
+fi
 
 #------------------------------------------------
-# Create Persisent Volume Claims (PVC)
+# Create Persistent Volume Claims (PVC)
 #
+if [ $interactive -eq 1 ]
+then
+   echo ""
+   echo "Create Persistent Volume Claims (PVC)"
+   echo "===================================="
+fi
 create_pvc
+if [ $interactive -eq 1 ]
+then
+  echo ""
+  echo "kubectl get pvc"
+  kubectl get pvc
+  press_key_to_continue
+fi
 
 #------------------------------------------------
 # Create Roxie pods and load balancer service
 #
+if [ $interactive -eq 1 ]
+then
+   echo ""
+   echo "Create Roxie and proxy service"
+   echo "=============================="
+fi
 if [ ${NUM_ROXIE_SHARED_VOLUME} -gt 0 ]
 then
   for i in $(seq 1 ${NUM_ROXIE_SHARED_VOLUME})
@@ -144,24 +218,91 @@ then
 else
   ${SCRIPT_DIR}/create-rc-w-esb.sh roxie $NUM_ROIXIE 
 fi
-
+if [ $interactive -eq 1 ]
+then
+  echo ""
+  echo "kubectl get pods | grep roxie"
+  kubectl get pods | grep roxie
+  if [ ${NUM_ROXIE_SHARED_VOLUME} -gt 0 ]
+  then
+     echo ""
+     echo "kubectl get service | grep roxie"
+     kubectl get service | grep roxie
+  fi
+  press_key_to_continue
+fi
 
 #------------------------------------------------
 # Create Esp pods and load balancer service
 #
+if [ $interactive -eq 1 ]
+then
+   echo ""
+   echo "Create Esp and Load Balancer"
+   echo "============================"
+fi
 create_one ${ROOT_DIR}/esp-rc.yaml
 create_one ${ROOT_DIR}/esp-service.yaml
+if [ $interactive -eq 1 ]
+then
+  echo ""
+  echo "kubectl get pods | grep esp"
+  kubectl get pods | grep esp
+  echo ""
+  echo "kubectl get service | grep esp"
+  kubectl get service | grep esp
+  press_key_to_continue
+fi
 
 #------------------------------------------------
 # Create Thor Volumes and pods 
+if [ $interactive -eq 1 ]
+then
+   echo ""
+   echo "Create Thor"
+   echo "==========="
+fi
 ${SCRIPT_DIR}/create-rc-w-esb.sh  thor $NUM_THOR 
+if [ $interactive -eq 1 ]
+then
+  echo ""
+  echo "kubectl get pods | grep thor"
+  kubectl get pods | grep thor
+  press_key_to_continue
+fi
 
 #------------------------------------------------
 # Create Dali (HPCC support) pod 
+if [ $interactive -eq 1 ]
+then
+   echo ""
+   echo "Create Dali/Support"
+   echo "==================="
+fi
 create_one ${ROOT_DIR}/dali-rc.yaml
+if [ $interactive -eq 1 ]
+then
+  echo ""
+  echo "kubectl get pods | grep dali"
+  kubectl get pods | grep dali
+  press_key_to_continue
+fi
 
 #------------------------------------------------
 # Create HPCC Ansible  pod 
+if [ $interactive -eq 1 ]
+then
+   echo ""
+   echo "Create Ansible Pod"
+   echo "=================="
+fi
 sed  "s/<NUM_ROXIE_LB>/${NUM_ROXIE_SHARED_VOLUME}/g;" \
       ${ROOT_DIR}/hpcc-ansible-template.yaml > ${CONF_DIR}/hpcc-ansible.yaml
 create_one ${CONF_DIR}/hpcc-ansible.yaml
+if [ $interactive -eq 1 ]
+then
+  echo ""
+  echo "kubectl get pods"
+  kubectl get pods
+  echo ""
+fi
