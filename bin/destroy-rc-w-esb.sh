@@ -16,10 +16,13 @@ fi
 type=$1
 CONF_DIR=${ROOT_DIR}/$type
 
+padded_index=
+[ -n "$2" ] && padded_index=$(printf "%04d" $2)
+
 #-------------------------------------
 # For each created thor/roxie
 #
-kubectl get pods | grep ${type}-rc  | cut -d' '  -f 1 | \
+kubectl get pods | grep ${type}-rc${padded_index}  | cut -d' '  -f 1 | \
 while read pod_name
 do
    volume_id=$(kubectl get pod $pod_name -o json | grep -i volumeID | \
