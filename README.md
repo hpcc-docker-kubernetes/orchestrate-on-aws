@@ -5,7 +5,7 @@
 To deploy HPCC cluster on Kubernetes/AWS we need AWS Client and Kubernetes package
 
 ### Install and Configure AWS Client
-Install AWS Clinet as 
+Install AWS Client as 
 http://docs.aws.amazon.com/cli/latest/userguide/installing.html#install-bundle-other-os
 
 Configure AWS client with Access Key Secrete Access Key and default region: 
